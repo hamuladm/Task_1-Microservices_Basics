@@ -1,14 +1,23 @@
 from fastapi import FastAPI
 import uuid
 import requests
+import time
 
 app = FastAPI()
+MAX_TRIES = 10
+DELAY = 2.
 
 
 @app.post("/facade")
 def post_handler(msg: str):
     id = uuid.uuid4()
-    _ = requests.post(f"http://0.0.0.0:8081/logging?uuid={id}&msg={msg}")
+    for _ in range(MAX_TRIES):
+        try:
+            _ = requests.post(f"http://0.0.0.0:8081/logging?uuid={id}&msg={msg}")
+            return {"Sent": "OK"}
+        except Exception:
+            time.sleep(DELAY)
+    return {"message": "Logging service unreachable"}
 
 
 @app.get("/facade")

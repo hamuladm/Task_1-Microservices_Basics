@@ -1,8 +1,7 @@
 from fastapi import FastAPI
-from collections import defaultdict
 
 app = FastAPI()
-msg_map = defaultdict()
+msg_map = {}
 
 
 @app.post("/logging")
@@ -12,4 +11,4 @@ def post_handler(uuid: str, msg: str):
 
 @app.get("/logging")
 def get_handler():
-    return f"{msg_map.values()}"
+    return f"{list(msg_map.values())}"
