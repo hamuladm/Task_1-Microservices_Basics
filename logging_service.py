@@ -3,8 +3,16 @@ from pydantic import BaseModel
 from utils import create_client
 import uvicorn
 import sys
+import subprocess
 
 app = FastAPI()
+hz_port = sys.argv[1].split(":")[-1]
+subprocess.Popen(
+    ["hz", "start", "--port", f"{hz_port}"],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+    text=True,
+)
 client = create_client(sys.argv[1])
 msg_map = client.get_map("msg_map")
 
@@ -21,6 +29,7 @@ def post_handler(log_message: LogMessage):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"UUID '{log_message.uuid}' already exists",
         )
+    print(f"Received UUID: {log_message.uuid}, message: {log_message.msg}")
     msg_map.put(log_message.uuid, log_message.msg)
     return {"message": "Log created", "uuid": log_message.uuid}
 
